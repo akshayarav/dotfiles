@@ -1,7 +1,17 @@
 #!/bin/bash
-# Symlink configurations to home directory
+
+# Get the absolute path of the directory where install.sh is located
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 mkdir -p ~/.config
-ln -sf ~/dotfiles/nvim ~/.config/nvim
-ln -sf ~/dotfiles/starship.toml ~/.config/starship.toml
-ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
-ln -sf ~/dotfiles/.zshrc ~/.zshrc
+
+# Clean up old target links/directories
+rm -rf ~/.config/nvim ~/.zshrc ~/.tmux.conf ~/.config/starship.toml
+
+# Create relative symlinks using exact current path
+ln -sfn "$DIR/nvim" ~/.config/nvim
+ln -sf "$DIR/starship.toml" ~/.config/starship.toml
+ln -sf "$DIR/.tmux.conf" ~/.tmux.conf
+ln -sf "$DIR/.zshrc" ~/.zshrc
+
+echo "Symlinks successfully created from $DIR!"
