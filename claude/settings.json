@@ -18,5 +18,6 @@
       "Bash(which:*)"
     ]
   },
-  "theme": "dark"
+  "theme": "custom:tokyonight",
+  "preferredNotifChannel": "iterm2"
 }

@@ -54,7 +54,7 @@ devc() {
   [ -d .devcontainer ] || args+=(--config ~/.devcontainer_template/devcontainer.json)
   [[ $1 == -r ]] && rebuild=(--remove-existing-container) && shift
   devcontainer up "${args[@]}" "${rebuild[@]}" || return
-  local name=${1:-${PWD:t}} cmd="DOCKER_CONTEXT=colima ${commands[devcontainer]} exec ${(j: :)${(@q)args}} zsh"
+  local name=${1:-${PWD:t}} cmd="DOCKER_CONTEXT=colima ${commands[devcontainer]} exec ${(j: :)${(@q)args}} --remote-env TERM=xterm-256color --remote-env COLORTERM=truecolor --remote-env \"TMUX=\$TMUX\" zsh"
   tmux has-session -t "=$name" 2>/dev/null || tmux new-session -d -s "$name" "$cmd" \; set-option default-command "$cmd"
   [ -n "$TMUX" ] && tmux switch-client -t "=$name" || tmux attach -t "=$name"
 }
