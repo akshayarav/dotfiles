@@ -21,7 +21,7 @@ vim.opt.foldlevel = 99
 vim.opt.clipboard = "unnamedplus"
 
 -- Off macOS (i.e. in devcontainers) there's no pbcopy, and the forwarded $TMUX points at the host's socket,
--- so copy via OSC 52 (tmux passes it to iTerm2). Paste from the Mac with Cmd+V; "+p pastes the last yank.
+-- so copy via OSC 52 (a tmux hook in .tmux.conf pipes it to pbcopy). Paste from the Mac with Cmd+V; "+p pastes the last yank.
 if vim.fn.has("mac") == 0 then
   local osc52 = require("vim.ui.clipboard.osc52")
   local function paste()
