@@ -3,6 +3,11 @@
 # Get the absolute path of the directory where install.sh is located
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# Pinned for both the Mac and containers, so they can't drift: nvim plugins are locked against this Neovim,
+# and both sides share each project's .jj folder. To upgrade, bump here, rerun install.sh on the Mac, then `devc -r`
+NVIM_VERSION=0.12.5
+JJ_VERSION=0.45.1
+
 # Linux (devcontainers): install personal tools, so any Debian/Ubuntu devcontainer image gets them
 # `devc` clones this repo into every container and runs this script (see --dotfiles-repository)
 if [[ "$(uname)" == "Linux" ]]; then
@@ -29,8 +34,7 @@ if [[ "$(uname)" == "Linux" ]]; then
     NVIM_ARCH=x86_64 TS_ARCH=x64 JJ_ARCH=x86_64
   fi
 
-  # Native Neovim binary; pinned so rebuilds don't pull a release the locked plugins don't support yet
-  NVIM_VERSION=0.12.5
+  # Native Neovim binary
   curl -fsSL https://github.com/neovim/neovim/releases/download/v$NVIM_VERSION/nvim-linux-$NVIM_ARCH.tar.gz | sudo tar -C /opt -xz
   sudo ln -sf /opt/nvim-linux-$NVIM_ARCH/bin/nvim /usr/local/bin/nvim
 
@@ -38,8 +42,7 @@ if [[ "$(uname)" == "Linux" ]]; then
   curl -fsSL https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-linux-$TS_ARCH.gz | gunzip | sudo tee /usr/local/bin/tree-sitter >/dev/null
   sudo chmod +x /usr/local/bin/tree-sitter
 
-  # Jujutsu (jj); release file names include the version, so it's pinned here
-  JJ_VERSION=0.45.1
+  # Jujutsu (jj)
   curl -fsSL https://github.com/jj-vcs/jj/releases/download/v$JJ_VERSION/jj-v$JJ_VERSION-$JJ_ARCH-unknown-linux-musl.tar.gz | sudo tar -xz -C /usr/local/bin ./jj
 
   # Starship prompt & zsh-autosuggestions
@@ -79,6 +82,14 @@ done
 # macOS: what Claude Code's /terminal-setup does for iTerm2 (lets /copy write to the clipboard)
 if [[ "$(uname)" == "Darwin" ]]; then
   defaults write com.googlecode.iterm2 AllowClipboardAccess -bool true
+
+  # Neovim & jj from the same pinned releases as containers, instead of Homebrew (~/.local/bin is first on PATH)
+  if [ "$(uname -m)" = "arm64" ]; then NVIM_ARCH=arm64 JJ_ARCH=aarch64; else NVIM_ARCH=x86_64 JJ_ARCH=x86_64; fi
+  mkdir -p ~/.local/opt ~/.local/bin
+  rm -rf ~/.local/opt/nvim-macos-$NVIM_ARCH
+  curl -fsSL https://github.com/neovim/neovim/releases/download/v$NVIM_VERSION/nvim-macos-$NVIM_ARCH.tar.gz | tar -C ~/.local/opt -xz
+  ln -sf ~/.local/opt/nvim-macos-$NVIM_ARCH/bin/nvim ~/.local/bin/nvim
+  curl -fsSL https://github.com/jj-vcs/jj/releases/download/v$JJ_VERSION/jj-v$JJ_VERSION-$JJ_ARCH-apple-darwin.tar.gz | tar -xz -C ~/.local/bin ./jj
 
   # tmux plugin manager (plugins are listed in .tmux.conf; prefix + I installs them)
   [ -d ~/.tmux/plugins/tpm ] || git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
