@@ -9,7 +9,6 @@ if command -v figlet > /dev/null; then
   figlet AA
   echo -e "\033[0m"
   
-  # ──────────────── Aesthetic Info Block ────────────────
   echo -e "\033[1;36m📅  Date:\033[0m       $(date '+%A, %B %d, %Y')"
   echo -e "\033[1;36m⏰  Time:\033[0m       $(date '+%I:%M %p')"
   echo -e "\033[1;36m🖥️  Host:\033[0m       $(hostname)"
@@ -26,7 +25,8 @@ export PATH="/opt/homebrew/bin:$PATH"
 [[ ! -r /Users/akshay/.opam/opam-init/init.zsh ]] || source /Users/akshay/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
 export CMR_ROOT=/Users/akshay/cmr
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh 2>/dev/null ||
+  source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 export PATH="/Users/akshay/.deta/bin:$PATH"
 
@@ -45,3 +45,19 @@ work() {
 bindkey '^K' up-line-or-history
 bindkey '^J' down-line-or-history
 eval "$(starship init zsh)"
+
+# ──────────────── Devcontainer Dotfiles & Helpers ────────────────
+devc() {
+  colima status >/dev/null 2>&1 || colima start --cpu 4 --memory 4 --mount-type virtiofs || return
+  local -x DOCKER_CONTEXT=colima
+  local args=(--workspace-folder "$PWD") rebuild=()
+  [ -d .devcontainer ] || args+=(--config ~/.devcontainer_template/devcontainer.json)
+  [[ $1 == -r ]] && rebuild=(--remove-existing-container) && shift
+  devcontainer up "${args[@]}" "${rebuild[@]}" || return
+  local name=${1:-${PWD:t}} cmd="DOCKER_CONTEXT=colima ${commands[devcontainer]} exec ${(j: :)${(@q)args}} zsh"
+  tmux has-session -t "=$name" 2>/dev/null || tmux new-session -d -s "$name" "$cmd" \; set-option default-command "$cmd"
+  [ -n "$TMUX" ] && tmux switch-client -t "=$name" || tmux attach -t "=$name"
+}
+
+export PATH="$HOME/.devcontainers/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
