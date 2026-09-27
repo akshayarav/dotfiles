@@ -1,3 +1,7 @@
 [user]
 name = "Akshay"
 email = "akshayarav2013@gmail.com"
+
+[revsets]
+# Show full history plus any unpushed work (default hides pushed commits)
+log = "::@ | mutable()"
