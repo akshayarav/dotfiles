@@ -29,16 +29,14 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 vim.opt.clipboard = "unnamedplus"
 
 -- Off macOS (i.e. in devcontainers) there's no pbcopy, and the forwarded $TMUX points at the host's socket,
--- so copy via OSC 52 (a tmux hook in .tmux.conf pipes it to pbcopy). Paste from the Mac with Cmd+V; "+p pastes the last yank.
+-- so use OSC 52: copies reach the Mac via a tmux hook that pipes to pbcopy, and pastes ask tmux,
+-- which fetches the Mac clipboard from iTerm2 (get-clipboard in .tmux.conf)
 if vim.fn.has("mac") == 0 then
   local osc52 = require("vim.ui.clipboard.osc52")
-  local function paste()
-    return { vim.fn.split(vim.fn.getreg(""), "\n"), vim.fn.getregtype("") }
-  end
   vim.g.clipboard = {
     name = "OSC 52",
     copy = { ["+"] = osc52.copy("+"), ["*"] = osc52.copy("*") },
-    paste = { ["+"] = paste, ["*"] = paste },
+    paste = { ["+"] = osc52.paste("+"), ["*"] = osc52.paste("*") },
   }
 end
 
