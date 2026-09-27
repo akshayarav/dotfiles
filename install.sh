@@ -29,8 +29,9 @@ if [[ "$(uname)" == "Linux" ]]; then
     NVIM_ARCH=x86_64 TS_ARCH=x64 JJ_ARCH=x86_64
   fi
 
-  # Native Neovim binary
-  curl -fsSL https://github.com/neovim/neovim/releases/latest/download/nvim-linux-$NVIM_ARCH.tar.gz | sudo tar -C /opt -xz
+  # Native Neovim binary; pinned so rebuilds don't pull a release the locked plugins don't support yet
+  NVIM_VERSION=0.12.5
+  curl -fsSL https://github.com/neovim/neovim/releases/download/v$NVIM_VERSION/nvim-linux-$NVIM_ARCH.tar.gz | sudo tar -C /opt -xz
   sudo ln -sf /opt/nvim-linux-$NVIM_ARCH/bin/nvim /usr/local/bin/nvim
 
   # tree-sitter CLI (nvim-treesitter uses it to build parsers; prebuilt binaries need glibc 2.39+)
