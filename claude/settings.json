@@ -16,8 +16,15 @@
       "Bash(fdfind:*)",
       "Bash(tree:*)",
       "Bash(which:*)"
+    ],
+    "deny": [
+      "Bash(sudo:*)"
     ]
   },
+  "tui": "default",
   "theme": "custom:tokyonight",
-  "preferredNotifChannel": "iterm2"
+  "preferredNotifChannel": "iterm2",
+  "enabledPlugins": {
+    "clangd-lsp@claude-plugins-official": true
+  }
 }

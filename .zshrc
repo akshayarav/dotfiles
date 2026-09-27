@@ -50,11 +50,16 @@ eval "$(starship init zsh)"
 devc() {
   colima status >/dev/null 2>&1 || colima start --cpu 4 --memory 4 --mount-type virtiofs || return
   local -x DOCKER_CONTEXT=colima
-  local args=(--workspace-folder "$PWD") rebuild=()
+  local args=(--workspace-folder "$PWD") rebuild=() env=(--remote-env CLAUDE_CONFIG_DIR=/home/vscode/.claude)
   [ -d .devcontainer ] || args+=(--config ~/.devcontainer_template/devcontainer.json)
   [[ $1 == -r ]] && rebuild=(--remove-existing-container) && shift
-  devcontainer up "${args[@]}" "${rebuild[@]}" || return
-  local name=${1:-${PWD:t}} cmd="DOCKER_CONTEXT=colima ${commands[devcontainer]} exec ${(j: :)${(@q)args}} --remote-env TERM=xterm-256color --remote-env COLORTERM=truecolor --remote-env \"TMUX=\$TMUX\" zsh"
+  # Personal layer on top of any config: dotfiles (cloned, then install.sh), Claude config volume, node for nvim LSPs
+  # ~/.ssh is deliberately not mounted: no GitHub credentials in containers, so pushes happen from the Mac
+  devcontainer up "${args[@]}" "${rebuild[@]}" "${env[@]}" \
+    --dotfiles-repository https://github.com/akshayarav/dotfiles.git \
+    --mount type=volume,source=claude-config,target=/home/vscode/.claude \
+    --additional-features '{"ghcr.io/devcontainers/features/node:1":{}}' || return
+  local name=${1:-${PWD:t}} cmd="DOCKER_CONTEXT=colima ${commands[devcontainer]} exec ${(j: :)${(@q)args}} ${(j: :)${(@q)env}} --remote-env TERM=xterm-256color --remote-env COLORTERM=truecolor --remote-env \"TMUX=\$TMUX\" zsh"
   tmux has-session -t "=$name" 2>/dev/null || tmux new-session -d -s "$name" "$cmd" \; set-option default-command "$cmd"
   [ -n "$TMUX" ] && tmux switch-client -t "=$name" || tmux attach -t "=$name"
 }

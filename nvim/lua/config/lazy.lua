@@ -14,9 +14,21 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- Dotfiles are a read-only clone in devcontainers, so lazy.nvim works from a writable copy of the lockfile there
+local lockfile = vim.fn.stdpath("config") .. "/lazy-lock.json"
+if vim.fn.filewritable(lockfile) ~= 1 then
+  local copy = vim.fn.stdpath("state") .. "/lazy-lock.json"
+  if not (vim.uv or vim.loop).fs_stat(copy) then
+    vim.fn.mkdir(vim.fn.stdpath("state"), "p")
+    vim.fn.writefile(vim.fn.readfile(lockfile), copy)
+  end
+  lockfile = copy
+end
+
 require("lazy").setup({
   spec = {
     { import = "plugins" },
   },
+  lockfile = lockfile,
   checker = { enabled = true },
 })

@@ -11,7 +11,8 @@ return {
   {
     "williamboman/mason-lspconfig.nvim",
     opts = {
-      ensure_installed = { "lua_ls", "pyright", "clangd" },
+      -- clangd comes from apt: Mason has no linux-arm64 build
+      ensure_installed = { "lua_ls", "pyright" },
     },
   },
 
@@ -85,11 +86,26 @@ return {
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("UserLspConfig", {}),
         callback = function(ev)
-          local opts = { buffer = ev.buf }
-          vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-          vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-          vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
-          vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+          local function map(lhs, rhs, desc)
+            vim.keymap.set("n", lhs, rhs, { buffer = ev.buf, desc = desc })
+          end
+          map("K", vim.lsp.buf.hover, "Hover docs")
+          map("gd", vim.lsp.buf.definition, "Go to definition")
+          map("<leader>rn", vim.lsp.buf.rename, "Rename symbol")
+          map("<leader>ca", vim.lsp.buf.code_action, "Code action")
+          map("gh", vim.diagnostic.open_float, "Show diagnostics")
+
+          -- Format on save with the attached server, if it supports formatting
+          local client = vim.lsp.get_client_by_id(ev.data.client_id)
+          if client and client:supports_method("textDocument/formatting") then
+            vim.api.nvim_create_autocmd("BufWritePre", {
+              group = vim.api.nvim_create_augroup("UserLspFormat." .. ev.buf, { clear = true }),
+              buffer = ev.buf,
+              callback = function()
+                vim.lsp.buf.format({ bufnr = ev.buf, id = client.id, timeout_ms = 1000 })
+              end,
+            })
+          end
         end,
       })
     end,
