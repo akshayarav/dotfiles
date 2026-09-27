@@ -15,4 +15,12 @@ ln -sf "$DIR/.tmux.conf" ~/.tmux.conf
 ln -sf "$DIR/.zshrc" ~/.zshrc
 ln -sf "$DIR/.devcontainer_template" ~/.devcontainer_template
 
+# Claude Code: link individual items only, since ~/.claude also holds credentials, history and sessions
+CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+mkdir -p "$CLAUDE_DIR"
+for item in settings.json CLAUDE.md commands; do
+  rm -rf "$CLAUDE_DIR/$item"
+  ln -sfn "$DIR/claude/$item" "$CLAUDE_DIR/$item"
+done
+
 echo "Symlinks successfully created from $DIR!"

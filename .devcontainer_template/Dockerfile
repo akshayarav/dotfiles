@@ -41,3 +41,7 @@ RUN git clone https://github.com/zsh-users/zsh-autosuggestions /usr/share/zsh-au
 USER vscode
 ENV SHELL=/bin/zsh
 WORKDIR /home/vscode
+
+# Install Claude Code (native installer -> ~/.local/bin/claude)
+# Pre-create ~/.claude so the named volume mounted there is owned by vscode, not root
+RUN curl -fsSL https://claude.ai/install.sh | bash && mkdir -p /home/vscode/.claude
