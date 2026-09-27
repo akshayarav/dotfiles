@@ -81,6 +81,10 @@ if [[ "$(uname)" == "Darwin" ]]; then
 
   # tmux plugin manager (plugins are listed in .tmux.conf; prefix + I installs them)
   [ -d ~/.tmux/plugins/tpm ] || git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+  ~/.tmux/plugins/tpm/bin/install_plugins
+
+  # tmux-fingers needs its binary; fetch it now instead of via the interactive wizard
+  [ -x ~/.tmux/plugins/tmux-fingers/bin/tmux-fingers ] || ~/.tmux/plugins/tmux-fingers/install-wizard.sh download-binary
 fi
 
 if [[ "$(uname)" == "Linux" ]]; then
