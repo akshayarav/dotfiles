@@ -84,11 +84,17 @@ if [[ "$(uname)" == "Darwin" ]]; then
   defaults write com.googlecode.iterm2 AllowClipboardAccess -bool true
 
   # Neovim & jj from the same pinned releases as containers, instead of Homebrew (~/.local/bin is first on PATH)
-  if [ "$(uname -m)" = "arm64" ]; then NVIM_ARCH=arm64 JJ_ARCH=aarch64; else NVIM_ARCH=x86_64 JJ_ARCH=x86_64; fi
+  if [ "$(uname -m)" = "arm64" ]; then
+    NVIM_ARCH=arm64 TS_ARCH=arm64 JJ_ARCH=aarch64
+  else
+    NVIM_ARCH=x86_64 TS_ARCH=x64 JJ_ARCH=x86_64
+  fi
   mkdir -p ~/.local/opt ~/.local/bin
   rm -rf ~/.local/opt/nvim-macos-$NVIM_ARCH
   curl -fsSL https://github.com/neovim/neovim/releases/download/v$NVIM_VERSION/nvim-macos-$NVIM_ARCH.tar.gz | tar -C ~/.local/opt -xz
   ln -sf ~/.local/opt/nvim-macos-$NVIM_ARCH/bin/nvim ~/.local/bin/nvim
+  curl -fsSL https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-macos-$TS_ARCH.gz | gunzip > ~/.local/bin/tree-sitter
+  chmod +x ~/.local/bin/tree-sitter
   curl -fsSL https://github.com/jj-vcs/jj/releases/download/v$JJ_VERSION/jj-v$JJ_VERSION-$JJ_ARCH-apple-darwin.tar.gz | tar -xz -C ~/.local/bin ./jj
 
   # tmux plugin manager (plugins are listed in .tmux.conf; prefix + I installs them)
