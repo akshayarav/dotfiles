@@ -17,6 +17,14 @@ vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.opt.foldlevel = 99
 
+-- Briefly flash the yanked text
+vim.api.nvim_create_autocmd("TextYankPost", {
+  group = vim.api.nvim_create_augroup("UserYankHighlight", {}),
+  callback = function()
+    vim.hl.on_yank()
+  end,
+})
+
 -- Sync Neovim unnamed register with macOS system clipboard
 vim.opt.clipboard = "unnamedplus"
 
