@@ -7,6 +7,7 @@ return {
       { "<leader>c", group = "code" },
       { "<leader>h", group = "hunk (git)" },
       { "<leader>j", group = "jj" },
+      { "<leader>s", group = "strudel" },
     },
   },
 }
